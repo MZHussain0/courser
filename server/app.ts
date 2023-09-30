@@ -2,6 +2,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import { errorMiddleware } from "./middleware/error";
 export const app = express();
 
 // Body parser
@@ -31,3 +32,6 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
   err.statusCode = 404;
   next(err);
 });
+
+// Error Handling middleware
+app.use(errorMiddleware);
