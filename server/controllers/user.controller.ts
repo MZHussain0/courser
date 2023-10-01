@@ -1,6 +1,7 @@
 ﻿import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import userModel from "../models/user.model";
+import { getUserById } from "../services/user.service";
 import ErrorHandler from "../utils/ErrorHandler";
 import { CatchAsynErrorHandler } from "../utils/asynErrorHandler";
 import {
@@ -221,6 +222,45 @@ export const updateAccessToken = CatchAsynErrorHandler(
       res.status(200).json({
         status: "success",
         access_token,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// get user info
+export const getUserInfo = CatchAsynErrorHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user?._id;
+      getUserById(userId, res);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Social authentication
+interface ISocialAuthBody {
+  email: string;
+  name: string;
+  avatar: string;
+}
+export const socialAuth = CatchAsynErrorHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, name, avatar } = req.body as IRegisterationBody;
+      const user = await userModel.findOne({ email });
+
+      if (!user) {
+        const newUser = await userModel.create({ name, email, avatar });
+        sendToken(newUser, res, 201);
+      } else {
+        sendToken(user, res, 200);
+      }
+      res.status(200).json({
+        success: true,
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
