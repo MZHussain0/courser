@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Professional Email</title>
+    <style>
+      /* Reset styles */
+      body,
+      body * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Global styles */
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        background-color: #f2f2f2;
+        color: #333333;
+      }
+
+      /* Container styles */
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border: 1px solid #dddddd;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Header styles */
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #333333;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      /* Content styles */
+      .content {
+        margin-bottom: 20px;
+      }
+
+      .content p {
+        margin-bottom: 10px;
+      }
+
+      /* Footer styles */
+      .footer {
+        text-align: center;
+      }
+
+      .footer p {
+        color: #999999;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to courserr</h1>
+      </div>
+      <div class="content">
+        <p>Dear <%= user.name %>,</p>
+        <p>
+          Thank you for registering with courserr. To activate your account,
+          please use the following activation code:
+        </p>
+        <h2><%= activationCode %></h2>
+        <p>
+          Please enter this code on the activation page within next 5 minutes.
+        </p>
+      </div>
+      <div class="footer">
+        <p>
+          If you have any questions, please don't hesitate to contact us at
+          <a href="mailto:support@courserr.com">support@courserr.com</a>
+        </p>
+        <p>&copy; 2023@courserr. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>

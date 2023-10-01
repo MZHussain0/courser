@@ -3,6 +3,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { errorMiddleware } from "./middleware/error";
+import userRouter from "./routes/user.route";
+
 export const app = express();
 
 // Body parser
@@ -17,6 +19,9 @@ app.use(
     origin: process.env.CORS_ORIGIN,
   })
 );
+
+// Routes
+app.use("/api", userRouter);
 
 // testing api
 app.get("/test", (req: Request, res: Response, next: NextFunction) => {
