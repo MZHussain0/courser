@@ -3,6 +3,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import userModel from "../models/user.model";
 import ErrorHandler from "../utils/ErrorHandler";
 import { CatchAsynErrorHandler } from "../utils/asynErrorHandler";
+import { sendToken } from "../utils/jwt";
 import sendMail from "../utils/sendMail";
 import { IUser } from "./../models/user.model";
 require("dotenv").config();
@@ -117,6 +118,50 @@ export const activateUser = CatchAsynErrorHandler(
 
       res.status(201).json({
         success: true,
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Login user
+export const loginUser = CatchAsynErrorHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password } = req.body as IRegisterationBody;
+
+      if (!email || !password) {
+        return next(new ErrorHandler("Please provide email and password", 400));
+      }
+
+      const user = await userModel.findOne({ email }).select("+password");
+      if (!user) {
+        return next(new ErrorHandler("Invalid email or password", 400));
+      }
+
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        return next(new ErrorHandler("Invalid email or password", 400));
+      }
+
+      sendToken(user, res, 200);
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Log out user
+export const logoutUser = CatchAsynErrorHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.cookie("accessToken", "", { maxAge: 1 });
+      res.cookie("refreshToken", "", { maxAge: 1 });
+
+      res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
