@@ -72,12 +72,20 @@ userSchema.pre<IUser>("save", async function (next) {
 
 // Sign access token
 userSchema.methods.SignAccessToken = function () {
-  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SECRET as Secret);
+  return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SECRET as Secret, {
+    expiresIn: "5m",
+  });
 };
 
 // Sign refresh token
 userSchema.methods.SignRefreshToken = function () {
-  return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SECRET as Secret);
+  return jwt.sign(
+    { id: this._id },
+    process.env.REFRESH_TOKEN_SECRET as Secret,
+    {
+      expiresIn: "7d",
+    }
+  );
 };
 
 // compare passwords

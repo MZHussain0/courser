@@ -1,9 +1,14 @@
 ﻿import { NextFunction, Request, Response } from "express";
-import jwt, { Secret } from "jsonwebtoken";
+import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import userModel from "../models/user.model";
 import ErrorHandler from "../utils/ErrorHandler";
 import { CatchAsynErrorHandler } from "../utils/asynErrorHandler";
-import { sendToken } from "../utils/jwt";
+import {
+  accessTokenOptions,
+  refreshTokenOptions,
+  sendToken,
+} from "../utils/jwt";
+import { redis } from "../utils/redis";
 import sendMail from "../utils/sendMail";
 import { IUser } from "./../models/user.model";
 require("dotenv").config();
@@ -159,9 +164,63 @@ export const logoutUser = CatchAsynErrorHandler(
       res.cookie("accessToken", "", { maxAge: 1 });
       res.cookie("refreshToken", "", { maxAge: 1 });
 
+      // Delete the cache from redis
+      const userId = req.user?._id;
+      redis.del(userId);
+
       res.status(200).json({
         success: true,
         message: "Logged out successfully",
+      });
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// update access token
+export const updateAccessToken = CatchAsynErrorHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const refreshToken = req.cookies.refreshToken as string;
+      const decoded = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET!
+      ) as JwtPayload;
+
+      if (!decoded) {
+        return next(new ErrorHandler("could not refresh token", 401));
+      }
+
+      const session = await redis.get(decoded.id);
+
+      if (!session) {
+        return next(new ErrorHandler("could not refresh token", 401));
+      }
+
+      const user = JSON.parse(session);
+      const access_token = jwt.sign(
+        { id: user._id },
+        process.env.ACCESS_TOKEN_SECRET as Secret,
+        {
+          expiresIn: "5m",
+        }
+      );
+
+      const refresh_token = jwt.sign(
+        { id: user._id },
+        process.env.REFRESH_TOKEN_SECRET as Secret,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      res.cookie("accessToken", access_token, accessTokenOptions);
+      res.cookie("refreshToken", refresh_token, refreshTokenOptions);
+
+      res.status(200).json({
+        status: "success",
+        access_token,
       });
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
