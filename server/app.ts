@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import { errorMiddleware } from "./middleware/error";
+import courseRouter from "./routes/course.route";
 import userRouter from "./routes/user.route";
 
 export const app = express();
@@ -22,6 +23,7 @@ app.use(
 
 // Routes
 app.use("/api", userRouter);
+app.use("/api", courseRouter);
 
 // testing api
 app.get("/test", (req: Request, res: Response, next: NextFunction) => {
